@@ -1,6 +1,3 @@
-from argparser import *
-from models import *
-
 import numpy as np
 from pathlib import Path
 from torch.utils.data import DataLoader
@@ -9,31 +6,49 @@ import datasets
 from datasets import load_dataset
 from tqdm import tqdm
 
+# relative imports
+from . import utils, data_utils, models
 
+def main(args = None):
 
-def get_dataloaders(ds_name='pg19', ds_dir='../datasets'):
+	# parse arguments if none are provided
+	if args is None:
+		args = utils.parse_args()
 
-	# create path for dataset if it doesn't exist
-	Path(ds_dir).mkdir(parents=True, exist_ok=True)
-	
-	# download or read in dataset
-	ds = load_dataset(
-		ds_name,
-		data_dir=ds_dir,
-	).with_format('torch')
+	# assign dict values to variable names
+	num_epochs = args['num_epochs']
+	batch_size = args['batch_size']
 
-	# create dictionary of dataloaders depending on the splits
-	splits=list(ds.keys())
-	dataloaders=[DataLoader(ds[split]) for split in splits]
+	# TODO define the models
 
-	return dataloaders
-
-def main():
-	args = parse_args()
-	dataloaders = get_dataloaders(
+	data, dataloaders = data_utils.get_data(
 		ds_name = args['dataset'],
-		ds_dir = args['dataset_dir']
+		ds_dir = args['dataset_dir'],
+		batch_size = batch_size
 	)
+	
+	# create a progress bar for training
+	progress_bar = tqdm(
+		range(num_epochs*len(dataloaders['train']))
+	)
+	
+	print('tokenizing')
+	tokenized_data = data_utils.build_vocab(data)
+	print('done')
+	return
+	for epoch in range(args['num_epochs']):
+		for batch in dataloaders['train']:
+			# increment the progress bar
+			progress_bar.update()
+			print(batch['text'][0])
+
+			# TODO make training code
+
+			# update progress bar with important tracking values
+			progress_bar.set_postfix({
+				'test' : 10,
+			})
+
 	
 if __name__ == '__main__':
 	main()
