@@ -1,0 +1,9 @@
+#!/usr/bin/env python
+
+if __name__ == '__main__':
+	from src import trainer
+	from src import utils
+
+	args = utils.parse_args()
+	trainer.main(args)
+
